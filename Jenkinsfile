@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                bat 'mvn -B -U -e -V clean package -DskipTests'
+                sh 'mvn -B -U -e -V clean package -DskipTests'
             }
         }
 
@@ -26,13 +26,14 @@ pipeline {
             }
             steps {
                 echo "Deploying to CloudHub..."
-                bat '''
-                    mvn -U -V -e -B -DskipTests deploy -Pdev -DmuleDeploy ^
-                    -Dusername="%ANYPOINT_CREDENTIALS_USR%" ^
-                    -Dpassword="%ANYPOINT_CREDENTIALS_PSW%" ^
-                    -Danypoint.platform.client_id="%CLIENT_ID%" ^
-                    -Danypoint.platform.client_secret="%CLIENT_SECRET%"
-                '''
+                sh '''
+    mvn -U -V -e -B -DskipTests deploy -Pdev -DmuleDeploy \
+    -Dusername="$ANYPOINT_CREDENTIALS_USR" \
+    -Dpassword="$ANYPOINT_CREDENTIALS_PSW" \
+    -Danypoint.platform.client_id="$CLIENT_ID" \
+    -Danypoint.platform.client_secret="$CLIENT_SECRET"
+'''
+
             }
         }
     }
