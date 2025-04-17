@@ -2,16 +2,13 @@ pipeline {
     agent any
 
     environment {
-       
         ANYPOINT_CREDENTIALS = credentials('Anypoint_credentials')
-    
     }
 
     stages {
         stage('Build') {
             steps {
-              
-               bat 'env -B -U -e -V clean -DskipTests package'
+                bat 'mvn -B -U -e -V clean package -DskipTests'
             }
         }
 
@@ -23,19 +20,20 @@ pipeline {
         }
 
         stage('Deployment') {
-        
-    environment {
-       
-        CLIENT_ID = credentials('dev_client_id'),
-        CLIENT_SECRET=credentials('dev_client_secret')
-    
-    }
+            environment {
+                CLIENT_ID = credentials('dev_client_id')
+                CLIENT_SECRET = credentials('dev_client_secret')
+            }
             steps {
-                echo " Deploying to CloudHub (${MULE_ENV})..."
-                bat 'mvn -U -V -e -B -DskipTests deploy -Pdev -DmuleDeploy -Dusername="%ANYPOINT_CREDENTIALS_USR%" -Dpassword="%ANYPOINT_CREDENTIALS_PSW%" -Danypoint.platform.client_id="%CLIENT_ID%"  -Danypoint.platform.client_secret="%CLIENT_SECRET%"'
-             
+                echo "Deploying to CloudHub..."
+                bat '''
+                    mvn -U -V -e -B -DskipTests deploy -Pdev -DmuleDeploy ^
+                    -Dusername="%ANYPOINT_CREDENTIALS_USR%" ^
+                    -Dpassword="%ANYPOINT_CREDENTIALS_PSW%" ^
+                    -Danypoint.platform.client_id="%CLIENT_ID%" ^
+                    -Danypoint.platform.client_secret="%CLIENT_SECRET%"
+                '''
             }
         }
     }
-
- 
+}
